@@ -22,12 +22,19 @@ class MapGroups extends Base {
 
 		foreach ( $this->groupMap as $group => $rules ) {
 			$group = trim( $group );
+			$allowRemove = !isset( $rules['__ADDONLY__'] ) || !$rules['__ADDONLY__'];
 			$groupAdded = false;
 
 			foreach ( $rules as $attrName => $needles ) {
+				// __ADDONLY__ not a real SAML attribute, only used to indicate the MW group
+				// can only be added, not removed, due to presence of SAML attributes
+				if ( $attrName === '__ADDONLY__' ) {
+					continue;
+				}
+
 				if ( $groupAdded == true ) {
 					break;
-				} elseif ( !isset( $this->attributes[$attrName] ) ) {
+				} elseif ( $allowRemove && !isset( $this->attributes[$attrName] ) ) {
 					if ( method_exists( MediaWikiServices::class, 'getUserGroupManager' ) ) {
 						// MW 1.35+
 						MediaWikiServices::getInstance()->getUserGroupManager()
@@ -54,7 +61,7 @@ class MapGroups extends Base {
 						// in the list would always determine whether a group should be added or not
 						$groupAdded = true;
 						break;
-					} else {
+					} elseif ( $allowRemove ) {
 						if ( method_exists( MediaWikiServices::class, 'getUserGroupManager' ) ) {
 							// MW 1.35+
 							MediaWikiServices::getInstance()->getUserGroupManager()
