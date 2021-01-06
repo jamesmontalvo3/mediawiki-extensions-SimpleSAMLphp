@@ -20,12 +20,17 @@ class MapGroups extends Base {
 
 		foreach ( $this->groupMap as $group => $rules ) {
 			$group = trim( $group );
+			if ( $group === '__ADDONLY__' ) {
+				continue;
+			} else {
+				$allowRemove = !$this->groupMapRegex['__ADDONLY__'];
+			}
 			$groupAdded = false;
 
 			foreach ( $rules as $attrName => $needles ) {
 				if ( $groupAdded == true ) {
 					break;
-				} elseif ( !isset( $this->attributes[$attrName] ) ) {
+				} elseif ( $allowRemove && !isset( $this->attributes[$attrName] ) ) {
 					$this->user->removeGroup( $group );
 					continue;
 				}
@@ -40,7 +45,7 @@ class MapGroups extends Base {
 						// in the list would always determine whether a group should be added or not
 						$groupAdded = true;
 						break;
-					} else {
+					} elseif ( $allowRemove ) {
 						$this->user->removeGroup( $group );
 					}
 				}
