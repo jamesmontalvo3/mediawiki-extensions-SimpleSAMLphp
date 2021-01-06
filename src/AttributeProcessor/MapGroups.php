@@ -42,7 +42,17 @@ class MapGroups extends Base {
 					$samlProvidedGroups = explode( $groupListDelimiter, $samlProvidedGroups[0] );
 				}
 				foreach ( $needles as $needle ) {
-					if ( in_array( $needle, $samlProvidedGroups ) ) {
+					// Needle looks like a regex. This is an imperfect check, and will not validate
+					// the regex. Admin configuring permissions is expected to supply valid regex.
+					$useRegex = preg_match( "/^\/.+\/[a-z]*$/i", $needle );
+
+					if ( $useRegex ) {
+						$foundMatch = count( preg_grep( $needle, $samlProvidedGroups ) ) > 0;
+					} else {
+						$foundMatch = in_array( $needle, $samlProvidedGroups );
+					}
+
+					if ( $foundMatch ) {
 						if ( method_exists( MediaWikiServices::class, 'getUserGroupManager' ) ) {
 							// MW 1.35+
 							MediaWikiServices::getInstance()->getUserGroupManager()
@@ -50,6 +60,7 @@ class MapGroups extends Base {
 						} else {
 							$this->user->addGroup( $group );
 						}
+
 						// This differs from the original implementation: Otherwise the _last_ group
 						// in the list would always determine whether a group should be added or not
 						$groupAdded = true;
