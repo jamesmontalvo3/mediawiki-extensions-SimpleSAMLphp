@@ -117,6 +117,38 @@ class MapGroupsTest extends MediaWikiTestCase {
 				],
 				[ 'abc', 'sysop' ],
 				[ 'sysop' ]
+			],
+			'will-add-with-addonly' => [
+				[
+					'saml-groups' => [ 'saml-group-1' ]
+				],
+				[
+					'GroupMap' => [
+						'addonly_wikigroup' => [
+							'saml-groups' => [ 'saml-group-1' ],
+							'__ADDONLY__' => true
+						]
+					],
+					'GroupAttributeDelimiter' => null
+				],
+				[ 'initial_wiki_group_1' ],
+				[ 'initial_wiki_group_1', 'addonly_wikigroup' ]
+			],
+			'wont-remove-with-addonly' => [
+				[
+					'saml-groups' => [ 'saml-group-999' ]
+				],
+				[
+					'GroupMap' => [
+						'addonly_wikigroup' => [
+							'saml-groups' => [ 'saml-group-1' ],
+							'__ADDONLY__' => true
+						]
+					],
+					'GroupAttributeDelimiter' => null
+				],
+				[ 'addonly_wikigroup', 'initial_wiki_group_1' ],
+				[ 'addonly_wikigroup', 'initial_wiki_group_1' ]
 			]
 		];
 	}
